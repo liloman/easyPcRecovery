@@ -1,0 +1,13 @@
+/easyPcRecovery/clonezilla/hotkey
+timeout 1
+default 0
+
+title Boot Windows (XP)
+find --set-root --devices=h /ntldr
+chainloader /ntldr
+
+title ^F4 F4 Recover PC (SATA)
+configfile /submenu.lst
+
+title ^F5 F5 Recover PC (IDE)
+configfile /submenu-IDE.lst

@@ -1,0 +1,4 @@
+http://garr.dl.sourceforge.net/project/clonezilla/clonezilla_live_stable/2.3.1-18/clonezilla-live-2.3.1-18-i686-pae.zip
+http://netcologne.dl.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
+http://mirror.slitaz.org/iso/4.0/slitaz-4.0.iso
+http://download.plop.at/files/bootmngr/plpbt-5.0.14.zip

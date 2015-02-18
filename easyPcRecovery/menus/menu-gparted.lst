@@ -1,0 +1,15 @@
+/easyPcRecovery/clonezilla/hotkey
+timeout 10
+default 0
+
+title GParted live (partitioning)
+find --set-root --ignore-floppies  /easyPcRecovery/gparted/vmlinuz
+kernel /easyPcRecovery/gparted/vmlinuz  boot=live live-media-path=easyPcRecovery/gparted/ config  noswap noprompt  toram=filesystem.squashfs ip=frommedia  nosplash locales="es_ES.UTF-8" keyboard-layouts="es" gl_batch
+initrd /easyPcRecovery/gparted/initrd.img
+
+
+title ^F4 F4 Boot Windows (XP)
+find --set-root --devices=h /ntldr
+chainloader /ntldr
+
+
