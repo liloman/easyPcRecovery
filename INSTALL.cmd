@@ -33,19 +33,21 @@ for /F "tokens=1-2" %%a in ('wmic logicaldisk where "DeviceID='%systemdrive%'" g
 
 
 set count=0
+
 REM If there is enough space in %systemdrive%
 if !totalFreeMB! GTR !TotalusedMB! (  
-  set mapArray[0]=%systemdrive%
+  set /a count+=1
+  set mapArray[!count!]=%systemdrive%
   set /a Percentage=^(100 * totalFreeMB^) / SizeMB	
   echo 0^) %systemdrive% have !totalFreeMB!MB^(!totalFreeGB!GB^) free ^(!Percentage!%% free^) ^-^-^> WARNING: Needs partitioning
 )
 	
 REM echo Scaning for other disks/partitions...
 for /F "tokens=1-2" %%a in ('wmic logicaldisk get DeviceID^, DriveType^| find ":"') do (
-   if %%b NEQ 5 if not "%%a"=="C:" (
+   if %%b NEQ 5 if not "%%a"=="%systemdrive%" (
    For /f "usebackq delims== tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get FreeSpace /format:value`) do set FreeSpace=%%x
    For /f "usebackq delims== tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get Size /format:value`) do set Size=%%x
-   For /f "usebackq delims== tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get volumeName /format:value`) do set volName=%%x
+   For /f "usebackq delims=, tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get volumeName /format:csv`) do SET volName=%%x
     set FreeKB=!FreeSpace:~0,-4!
     set SizeKB=!Size:~0,-4!
 	set /a freeMB=freeKB / 1036
@@ -57,6 +59,7 @@ for /F "tokens=1-2" %%a in ('wmic logicaldisk get DeviceID^, DriveType^| find ":
 	set mapArray[!count!]=%%a	
     REM remove trailing spaces
     CALL :TRIM !volName! volName
+	CALL :TRIM %%a a
     echo !count!^) %%a^(!volName!^) have !FreeMB!MB^(!freeGB!GB^) free ^(!Percentage!%% free^)	
 	)
 	)	
@@ -64,10 +67,15 @@ for /F "tokens=1-2" %%a in ('wmic logicaldisk get DeviceID^, DriveType^| find ":
 
 REM :CH_DRIVE
 
+if %count%==0 ( 
+ echo You don´t have any unit with enough free space. 
+ goto :EXIT; 
+)
+
 echo Which unit do you want to use for backups? 
 SET /P ch="Choose a number (Press q to exit):"
 if %ch% EQU q (GOTO :EXIT)
-echo ON
+
 if %ch% gtr %count% ( 
  echo Incorrect number %ch%!!
  GOTO :EXIT
@@ -85,21 +93,21 @@ GOTO :CH_INSTALL
 
 :CH_FSCHECK
 SET /P input="Are you sure you want to partitionate %systemdrive%? (Y/N):"
-if /I "%input%"!="Y" ( GOTO :EXIT)
+if /I not "%input%"=="Y" ( GOTO :EXIT)
 
 fsutil dirty query %systemdrive% | find "no" > NUL
 IF %ERRORLEVEL% NEQ 0 (
  echo You need to reboot your computer to do a filesystem check^(fsck^).
  echo Reboot and then launch again this executable.
  set /p input="Do you want to reboot the PC right now? (Y/N):".
- if /I "%input%"=="Y" ( shutdown -r -t 2 -c "Rebooting for filesystem check") 
+ if /I "%input%"=="Y" ^( shutdown -r -t 5 -c "Rebooting for filesystem check" ^) 
  GOTO :EXIT
 )else (
   REM echo Your filesystem is clean, not need fsck.
   echo Defragmenting the disk for partitioning. This will take some time. Be patient!! 
   echo Press a key to start or close the command for exit.
   pause > nul
-  defrag %systemdrive% -v
+  defrag %systemdrive%
   set BDRIVE=%systemdrive%
   GOTO :CH_GPARTED
 )
@@ -107,44 +115,52 @@ IF %ERRORLEVEL% NEQ 0 (
 REM THERE ISN´T AN EXTRA UNIT WITH ENOUGH FREE SPACE TO ALLOCATE ALMOST A BACKUP
 REM MUST PARTITIONATE THE CURRENT UNIT TO CREATE ANOTHER UNIT FROM THE FREE SPACE
 :CH_GPARTED
+if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
 if not exist %systemdrive%\easyPcRecovery\clonezilla mkdir %systemdrive%\easyPcRecovery\clonezilla
 if not exist %systemdrive%\easyPcRecovery\gparted mkdir %systemdrive%\easyPcRecovery\gparted
-if not exist %systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted.bin(
- echo Saving MBR to %systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted.bin
- easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted.bin
+if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin (
+ echo Saving MBR to %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
+ easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
 )
 echo Preparing menu
 copy /Y /V easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst
 copy /Y /V easyPcRecovery\menus\grldr %systemdrive%\
 copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezilla
-xcopy \easyPcRecovery\gparted %systemdrive%\easyPcRecovery\gparted /s /e /k /y
+
+if not exist gparted*.zip (
+echo Downloading the Gparted iso
+easyPcRecovery\bin\wget http://netcologne.dl.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
+)
+easyPcRecovery\bin\7za.exe e -o%systemdrive%\easyPcRecovery\gparted gparted*.zip live/*
+if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 echo Installing Gparted on MBR
-\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test (hd0) --save=%systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted-grub.bin  --force-backup-mbr
+\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
 if %ERRORLEVEL% NEQ 0 ( 
   echo Something was wrong with grubinst.exe
-  echo You have backup in 2 places:
-  echo %systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted.bin  (mbrfix)
-  echo %systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted-grub.bin  (grub)   
-  echo You can run: 
-  echo %systemdrive%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted.bin  
+  echo You have backups in 3 places:
+  echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  ^(mbrfix^)
+  echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(grub^)   
+  echo Your second sector on your hard disk ^(grub^)
+  echo You can run (into the directory you downloaded this software): 
+  echo easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  
   echo or
-  echo %systemdrive%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test (hd0) --restore=%systemdrive%\easyPcRecovery\gparted\mbr-pre-gparted-grub.bin
+  echo easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin ^(hd0^)
   echo or even
-  echo  %systemdrive%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test (hd0) --restore-prevmbr
+  echo easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test --restore-prevmbr ^(hd0^)
   pause 
   GOTO :EXIT
 )
 echo Reboot to boot gparted.
-echo Remember you need AT LEAST !Totalused!MB on the new partition.
+echo Remember you need AT LEAST !TotalusedMB!MB on the new partition.
 echo When you´ve finished with gparted, reboot and press F4 to boot Windows again.
 set /p input="Do you want to reboot the PC right now? (Y/N):".
-if /I "%input%"=="Y" ( shutdown -r -t 10 -c "Rebooting for partitioning with Gparted")
+if /I "%input%"=="Y" ( shutdown -r -t 5 -c "Rebooting for partitioning with Gparted")
 exit /B
 
 REM THERE IS AN EXTRA UNIT WITH ENOUGH FREE SPACE
 :CH_INSTALL
 SET /P input="Are you sure you want to install into %bdrive%? (Y/N):"
-if /I "%input%"!="Y" ( GOTO :EXIT)
+if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 echo Copying menus to %systemdrive%
 copy /Y /V easyPcRecovery\menus\*.lst %systemdrive%\
@@ -190,23 +206,32 @@ echo Deleting zips...
 del *.zip
 
 echo Installing MBR into %systemdrive%...
-if not exist %systemdrive%\easyPcRecovery\gparted\mbr-pre-install.bin(
- echo Saving MBR to %systemdrive%\easyPcRecovery\gparted\mbr-pre-install.bin
- easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\gparted\mbr-pre-install.bin
+if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
+if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin (
+ echo Saving MBR to %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
+ easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
 )
 
-easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test (hd0) --save=%systemdrive%\easyPcRecovery\gparted\mbr-pre-install-grub.bin  --force-backup-mbr
+easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  --force-backup-mbr (hd0)
 if  %ERRORLEVEL% NEQ 0 ( 
   echo Something was wrong with grubinst.exe
-  echo You have backup in 2 places:
-  echo %systemdrive%\easyPcRecovery\gparted\mbr-pre-install.bin  (mbrfix)
-  echo %systemdrive%\easyPcRecovery\gparted\mbr-pre-install-grub.bin  (grub)   
+  echo You have backups in 3 places:
+  echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin  ^(mbrfix^)
+  echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  ^(grub^)   
+  echo Your second sector on your hard disk ^(grub^)
   echo You can run: 
-  echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\gparted\mbr-pre-install.bin  
+  echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin  
   echo or
-  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test (hd0) --restore=%systemdrive%\easyPcRecovery\gparted\mbr-pre-install-grub.bin
+  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin ^(hd0^) 
   echo or even
-  echo  %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test (hd0) --restore-prevmbr
+  echo  %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --restore-prevmbr ^(hd0^)
+  echo IF you partitionated your hard disk you have 2 more MBR backups:
+  echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  ^(mbrfix^)
+  echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(grub^)   
+  echo You can try ONE OF THESE FIRST in this order, to get your original boot menu back: 
+  echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  
+  echo or
+  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin ^(hd0^) 
   pause 
   GOTO :EXIT
  )
