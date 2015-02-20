@@ -85,8 +85,12 @@ if "!mapArray[%ch%]!"=="%systemdrive%" (
    GOTO :CH_FSCHECK
 )
 
-echo !mapArray[%ch%]! is going to be the disk to save the backups.
 set BDRIVE=!mapArray[%ch%]!
+REM remove trailing spaces
+CALL :TRIM !bdrive! bdrive 
+
+echo !bdrive! is going to be the disk to save the backups.
+
 GOTO :CH_INSTALL
 
 
@@ -130,11 +134,14 @@ copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezi
 if not exist gparted*.zip (
 echo Downloading the Gparted iso
 easyPcRecovery\bin\wget http://netcologne.dl.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
+if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 )
 easyPcRecovery\bin\7za.exe e -o%systemdrive%\easyPcRecovery\gparted gparted*.zip live/*
 if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
+move /Y gparted*.zip easyPcRecovery\
+
 echo Installing Gparted on MBR
-\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
+\easyPcRecovery\clonezilla\grubinst.exe  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
 if %ERRORLEVEL% NEQ 0 ( 
   echo Something was wrong with grubinst.exe
   echo You have backups in 3 places:
@@ -144,9 +151,9 @@ if %ERRORLEVEL% NEQ 0 (
   echo You can run (into the directory you downloaded this software): 
   echo easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  
   echo or
-  echo easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin ^(hd0^)
+  echo easyPcRecovery\clonezilla\grubinst.exe --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(hd0^) 
   echo or even
-  echo easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test --restore-prevmbr ^(hd0^)
+  echo easyPcRecovery\clonezilla\grubinst.exe --restore-prevmbr ^(hd0^) 
   pause 
   GOTO :EXIT
 )
@@ -159,19 +166,19 @@ exit /B
 
 REM THERE IS AN EXTRA UNIT WITH ENOUGH FREE SPACE
 :CH_INSTALL
-SET /P input="Are you sure you want to install into %bdrive%? (Y/N):"
+SET /P input="Are you sure you want to install easyPcRecovery into %bdrive%? (Y/N):"
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
-echo Copying menus to %systemdrive%
+
+echo Copying menus to %systemdrive%\
 copy /Y /V easyPcRecovery\menus\*.lst %systemdrive%\
 copy /Y /V easyPcRecovery\menus\grldr %systemdrive%\
-mkdir %systemdrive%\easyPcRecovery\clonezilla
+
+if not exist %systemdrive%\easyPcRecovery\clonezilla mkdir %systemdrive%\easyPcRecovery\clonezilla
 copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezilla
 attrib +s +h %systemdrive%\*.lst
 attrib +s +h %systemdrive%\grldr
 attrib +s +h %systemdrive%\easyPcRecovery
-REM remove trailing spaces
-CALL :TRIM %bdrive% bdrive  
 
 REM Copy files to the backup drive
 echo Copying files to %BDRIVE%...
@@ -181,7 +188,7 @@ cd /D %BDRIVE%\easyPcRecovery
 
 REM Download
 echo Downloading the ISOs
-REM bin\wget -i bin\urls.txt
+bin\wget -nc -i bin\urls.txt
 
 REM Clonezilla
 echo Clonezilla...
@@ -209,10 +216,10 @@ echo Installing MBR into %systemdrive%...
 if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
 if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin (
  echo Saving MBR to %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
- easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
+ mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
 )
 
-easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  --force-backup-mbr (hd0)
+clonezilla\grubinst.exe --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  --force-backup-mbr (hd0)
 if  %ERRORLEVEL% NEQ 0 ( 
   echo Something was wrong with grubinst.exe
   echo You have backups in 3 places:
@@ -221,24 +228,24 @@ if  %ERRORLEVEL% NEQ 0 (
   echo Your second sector on your hard disk ^(grub^)
   echo You can run: 
   echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin  
-  echo or
-  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin ^(hd0^) 
+  echo or 
+  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(hd0^) 
   echo or even
-  echo  %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --restore-prevmbr ^(hd0^)
+  echo  %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore-prevmbr ^(hd0^)
   echo IF you partitionated your hard disk you have 2 more MBR backups:
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  ^(mbrfix^)
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(grub^)   
   echo You can try ONE OF THESE FIRST in this order, to get your original boot menu back: 
   echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  
   echo or
-  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --skip-mbr-test  --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin ^(hd0^) 
+  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin ^(hd0^)
   pause 
   GOTO :EXIT
  )
 
 echo Hiding files...
-REM cd ..
-REM HideEverything.cmd
+cd ..
+@cmd /c HideEverything.cmd
 
 
 echo

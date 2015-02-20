@@ -1,5 +1,5 @@
 #Deleted ocs_lang and ocs_live_keymap 
-/easyPcRecovery/clonezilla/hotkey
+find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey && /easyPcRecovery/clonezilla/hotkey
 # clear the display to keep it clean!
 clear
 # allow text output from any future commands  so we can debug the menu items
@@ -59,11 +59,12 @@ kernel /easyPcRecovery/clonezilla/live/vmlinuz boot=live live-config noswap %LOC
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
 title ^F8 F8 GParted live (partitioning)
-find --set-root --ignore-floppies  /easyPcRecovery/gparted/vmlinuz
+find --set-root /easyPcRecovery/gparted/vmlinuz
 #Dont use %LOCALES% be default...
 #set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
-kernel /easyPcRecovery/gparted/vmlinuz  boot=live live-media-path=easyPcRecovery/gparted/ config  noswap noprompt  toram=filesystem.squashfs ip=frommedia  nosplash %LOCALES% gl_batch
+kernel /easyPcRecovery/gparted/vmlinuz boot=live live-config noswap %LOCALES% edd=on nomodeset ip=frommedia nosplash live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs 
 initrd /easyPcRecovery/gparted/initrd.img
 
 title ^F9 F9 Extra Options (recovery console,Windows Vista/7,USB boot,Slitaz)
+find --set-root --ignore-floppies /extras.lst
 configfile /extras.lst

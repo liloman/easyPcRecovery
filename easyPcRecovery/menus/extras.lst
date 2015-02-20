@@ -1,4 +1,4 @@
-/easyPcRecovery/clonezilla/hotkey
+find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey && /easyPcRecovery/clonezilla/hotkey
 # clear the display to keep it clean!
 clear
 # allow text output from any future commands  so we can debug the menu items

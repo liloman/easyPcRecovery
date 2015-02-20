@@ -1,7 +1,5 @@
-*Detect sata/ide and change submodules.lst for clonezilla (sd / hd)
-*Multilanguage (spanish)
+*Multilanguage (spanish...)
 *Add support for CD/USB live creation
 *Create minimal live with custom boot.fedoraproject.com
-*Choice for systemdrive and anotherdrives when both are possible
 *Create uninstall
-*Dont overwrite mbr-backup.bin if exists
+

@@ -1,4 +1,4 @@
-/easyPcRecovery/clonezilla/hotkey
+find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey && /easyPcRecovery/clonezilla/hotkey
 timeout 10
 default 0
 
