@@ -143,6 +143,8 @@ move /Y gparted*.zip easyPcRecovery\
 echo Installing Gparted on MBR
 \easyPcRecovery\clonezilla\grubinst.exe  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
 if %ERRORLEVEL% NEQ 0 ( 
+  echo.
+  echo.
   echo Something was wrong with grubinst.exe
   echo You have backups in 3 places:
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  ^(mbrfix^)
@@ -221,6 +223,9 @@ if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin (
 
 clonezilla\grubinst.exe --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  --force-backup-mbr (hd0)
 if  %ERRORLEVEL% NEQ 0 ( 
+  echo.
+  echo.
+  echo      ERROR
   echo Something was wrong with grubinst.exe
   echo You have backups in 3 places:
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin  ^(mbrfix^)
@@ -248,8 +253,8 @@ cd ..
 @cmd /c HideEverything.cmd
 
 
-echo
-echo
+echo.
+echo.
 echo ===============FINISHED===============
 echo Reboot and make your fresh first backup right now if you want it.
 echo Press F4 on the boot menu to see the avaliable options.
