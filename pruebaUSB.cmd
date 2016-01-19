@@ -63,7 +63,7 @@ move /Y plpbt-5.0.14 extras\plop
 REM slitaz
 echo Slitaz...
 mkdir extras\slitaz
-move /Y slitaz*.iso extras\slitaz
+move /Y slitaz*.iso extras\slitaz\slitaz.iso
 
 echo Deleting zips...
 del *.zip

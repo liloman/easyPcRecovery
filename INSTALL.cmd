@@ -190,7 +190,7 @@ cd /D %BDRIVE%\easyPcRecovery
 
 REM Download
 echo Downloading the ISOs
-bin\wget -nc -i bin\urls.txt
+bin\wget --no-check-certificate -nc -i bin\urls.txt
 
 REM Clonezilla
 echo Clonezilla...
@@ -209,7 +209,7 @@ move /Y plpbt-5.0.15 extras\plop
 REM slitaz
 echo Slitaz...
 mkdir extras\slitaz
-move /Y slitaz*.iso extras\slitaz.iso
+move /Y slitaz*.iso extras\slitaz\slitaz.iso
 
 echo Deleting zips...
 del *.zip
