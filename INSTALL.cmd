@@ -133,7 +133,7 @@ copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezi
 
 if not exist gparted*.zip (
 echo Downloading the Gparted iso
-easyPcRecovery\bin\wget http://netcologne.dl.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
+easyPcRecovery\bin\wget http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.24.0-2/gparted-live-0.24.0-2-i586.zip
 if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 )
 easyPcRecovery\bin\7za.exe e -o%systemdrive%\easyPcRecovery\gparted gparted*.zip live/*
