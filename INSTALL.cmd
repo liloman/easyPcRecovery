@@ -133,12 +133,14 @@ copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezi
 
 if not exist gparted*.zip (
 echo Downloading the Gparted iso
-easyPcRecovery\bin\wget http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.24.0-2/gparted-live-0.24.0-2-i586.zip
+easyPcRecovery\bin\wget http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
 if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 )
+
 easyPcRecovery\bin\7za.exe e -o%systemdrive%\easyPcRecovery\gparted gparted*.zip live/*
 if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 move /Y gparted*.zip easyPcRecovery\
+if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 
 echo Installing Gparted on MBR
 \easyPcRecovery\clonezilla\grubinst.exe  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)

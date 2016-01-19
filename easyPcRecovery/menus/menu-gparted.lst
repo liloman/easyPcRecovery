@@ -1,10 +1,10 @@
-find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey && /easyPcRecovery/clonezilla/hotkey
+find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey  
 timeout 10
 default 0
 
 title GParted live (partitioning)
 find --set-root --ignore-floppies  /easyPcRecovery/gparted/vmlinuz
-kernel /easyPcRecovery/gparted/vmlinuz  union=overlay boot=live live-media-path=easyPcRecovery/gparted/ config  noswap noprompt  toram=filesystem.squashfs ip=frommedia  nosplash locales="es_ES.UTF-8" keyboard-layouts="es" gl_batch
+kernel /easyPcRecovery/gparted/vmlinuz  union=aufs boot=live live-media-path=easyPcRecovery/gparted/ config  noswap noprompt  toram=filesystem.squashfs ip=frommedia  nosplash locales="es_ES.UTF-8" keyboard-layouts="es" gl_batch
 initrd /easyPcRecovery/gparted/initrd.img
 
 
