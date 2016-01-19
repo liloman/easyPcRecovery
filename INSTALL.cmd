@@ -203,13 +203,13 @@ bin\7za.exe e -ogparted gparted*.zip live/*
 REM Plop
 echo Plop...
 mkdir extras
-bin\7za.exe x plpbt*.zip plpbt-5.0.14/plpbt.bin
-move /Y plpbt-5.0.14 extras\plop
+bin\7za.exe x plpbt*.zip plpbt-5.0.15/plpbt.bin
+move /Y plpbt-5.0.15 extras\plop
 
 REM slitaz
 echo Slitaz...
 mkdir extras\slitaz
-move /Y slitaz*.iso extras\slitaz
+move /Y slitaz*.iso extras\slitaz.iso
 
 echo Deleting zips...
 del *.zip

@@ -1,4 +1,4 @@
-find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey && /easyPcRecovery/clonezilla/hotkey
+find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey 
 # clear the display to keep it clean!
 clear
 # allow text output from any future commands  so we can debug the menu items
@@ -34,8 +34,8 @@ title ^F7 F7 Boot from USB (even if you BIOS doesn´t allow it)
 find --set-root --ignore-floppies   /easyPcRecovery/extras/plop/plpbt.bin
 kernel /easyPcRecovery/extras/plop/plpbt.bin hiddenusb usb1=2
 
-title ^F8 F8 Boot SliTaz 4.0
-find --set-root --ignore-floppies   /easyPcRecovery/extras/slitaz/slitaz-4.0.iso 
-map /easyPcRecovery/extras/slitaz/slitaz-4.0.iso (0xff) || map --mem /slitaz/slitaz-4.0.iso (0xff)
+title ^F8 F8 Boot SliTaz (5.0-rc3)
+find --set-root --ignore-floppies   /easyPcRecovery/extras/slitaz/slitaz.iso 
+map /easyPcRecovery/extras/slitaz/slitaz.iso (0xff) || map --mem /easyPcRecovery/extras/slitaz/slitaz.iso  (0xff)
 map --hook root (0xff)
 chainloader (0xff)
