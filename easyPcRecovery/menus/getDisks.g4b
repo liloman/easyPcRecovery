@@ -1,18 +1,26 @@
 !BAT
 
+:: varnames must be smaller than 8 characters
+:: %% = %%% in batch files...
+
 :: string of letters
 set abc=abcdefgh
 
 :: for WDRV
-set /a big1=%WDRV:~3,1%
-set /a small1=%WDRV:~5,1%
-set /a part1=%small1%+1
-set cmd1=abc:~%big1%,1
+set /a big=%WDRV:~3,1%
+set /a small=%WDRV:~5,1%
+set /a part=%small%+1
+set cmd=abc:~%big%,1
+
+call set letter=%%%cmd%%%
+set WDRV=sd%letter%%%part%
 
 :: for BAKDRV
-set /a big2=%BAKDRV:~3,1%
-set /a small2=%BAKDRV:~5,1%
-set /a part2=%small2%+1
-set cmd2=abc:~%big2%,1
+set /a big=%BAKDRV:~3,1%
+set /a small=%BAKDRV:~5,1%
+set /a part=%small%+1
+set cmd=abc:~%big%,1
 
+call set letter=%%%cmd%%%
+set BAKDRV=sd%letter%%%part%
 

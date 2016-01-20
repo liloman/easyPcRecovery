@@ -10,15 +10,9 @@ find /windows/explorer.exe  | set WDRV=
 #find backup drive and set root
 find --set-root /easyPcRecovery/clonezilla/live/vmlinuz | set BAKDRV=
 
-# find source volume for Windows and our backup volume - use hda instead of sda if IDE HDD
+# find source volume for Windows and our backup volume 
+# should autodetect and use hda instead of sda if IDE HDD 
 command /easyPcRecovery/menus/getDisks.g4b
-#this must be here. doesn't work in getDisks.g4b ???
-call set letter1=%%cmd1%%
-call set letter2=%%cmd2%%
-
-set WDRV=sd%letter1%%part1%
-set BAKDRV=sd%letter2%%part2%
-
 
 #dont Use %LOCALES% by default...
 #set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
