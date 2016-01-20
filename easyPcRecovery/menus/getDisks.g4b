@@ -1,0 +1,18 @@
+!BAT
+
+:: string of letters
+set abc=abcdefgh
+
+:: for WDRV
+set /a big1=%WDRV:~3,1%
+set /a small1=%WDRV:~5,1%
+set /a part1=%small1%+1
+set cmd1=abc:~%big1%,1
+
+:: for BAKDRV
+set /a big2=%BAKDRV:~3,1%
+set /a small2=%BAKDRV:~5,1%
+set /a part2=%small2%+1
+set cmd2=abc:~%big2%,1
+
+

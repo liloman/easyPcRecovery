@@ -1,33 +1,32 @@
-#Deleted ocs_lang and ocs_live_keymap 
-find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey  
+#Set root
+#find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey  
 # clear the display to keep it clean!
 clear
 # allow text output from any future commands  so we can debug the menu items
 debug on
 
-# find source volume for Windows and our backup volume - use hda instead of sda if IDE HDD
-if exist (hd0,0)/windows/explorer.exe set WDRV=sda1
-if exist (hd0,1)/windows/explorer.exe set WDRV=sda2
-if exist (hd0,2)/windows/explorer.exe set WDRV=sda3
-if exist (hd0,3)/windows/explorer.exe set WDRV=sda4
-if exist (hd0,0)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sda1
-if exist (hd0,1)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sda2
-if exist (hd0,2)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sda3
-if exist (hd1,0)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sdb1
-if exist (hd1,1)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sdb2
-if exist (hd1,2)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sdb3
-if exist (hd2,0)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sdc1
-if exist (hd2,1)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sdc2
-if exist (hd2,2)/easyPcRecovery/clonezilla/live/vmlinuz set BAKDRV=sdc3
+#find windows drive
+find /windows/explorer.exe  | set WDRV=
+#find backup drive and set root
+find --set-root /easyPcRecovery/clonezilla/live/vmlinuz | set BAKDRV=
 
-#Dont use %LOCALES% by default...
+# find source volume for Windows and our backup volume - use hda instead of sda if IDE HDD
+command /easyPcRecovery/menus/getDisks.g4b
+#this must be here. doesn't work in getDisks.g4b ???
+call set letter1=%%cmd1%%
+call set letter2=%%cmd2%%
+
+set WDRV=sd%letter1%%part1%
+set BAKDRV=sd%letter2%%part2%
+
+
+#dont Use %LOCALES% by default...
 #set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
 set BOPT=boot=live quiet live-config noswap edd=on nomodeset ip=frommedia union=overlay nosplash 
 #For clonezillas
 set RUN=ocs_live_run="ocs-live-general" live-media-path=/easyPcRecovery/clonezilla/live bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs
 #For recovery/backup only
 set PRERUN=ocs_prerun="mount /dev/%BAKDRV% /mnt" ocs_prerun1="mount --bind /mnt/easyPcRecovery/clonezilla/images /home/partimag/"
-
 
 
 timeout 25
@@ -38,29 +37,27 @@ find --set-root --devices=h /ntldr
 chainloader /ntldr
 
 
-title ^F5 F5 Recover Windows XP Backup
-find --set-root /easyPcRecovery/clonezilla/live/vmlinuz
+title ^F5 F5 Recover Windows XP Backup 
+#dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-title ^F6 F6 Backup Windows XP
-find --set-root /easyPcRecovery/clonezilla/live/vmlinuz
+title ^F6 F6 Backup Windows XP from %WDRV% to %BAKDRV%
+#dont fit locales
 set RUN1=ocs_live_run="ocs-sr -q2 -sc -rm-win-swap-hib -c --batch -j2 -z1 -i 2000 -p reboot saveparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
 title ^F7 F7 Boot clonezilla (manual)
-find --set-root /easyPcRecovery/clonezilla/live/vmlinuz
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUN% ocs_live_batch="no"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
 title ^F8 F8 GParted live (partitioning)
-find --set-root /easyPcRecovery/gparted/vmlinuz
+set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
 set RUN=live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs 
 kernel /easyPcRecovery/gparted/vmlinuz %BOPT% %RUN% %LOCALES% gl_batch union=aufs
 initrd /easyPcRecovery/gparted/initrd.img
 
 title ^F9 F9 Extra Options (recovery console,Windows Vista/7,USB boot,Slitaz)
-find --set-root --ignore-floppies /extras.lst
-configfile /extras.lst
+configfile /easyPcRecovery/menus/extras.lst

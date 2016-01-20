@@ -1,4 +1,6 @@
-find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey && /easyPcRecovery/clonezilla/hotkey
+#load key mappings
+find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey 
+
 timeout 1
 default 0
 
@@ -7,9 +9,9 @@ find --set-root --devices=h /ntldr
 chainloader /ntldr
 
 title ^F4 F4 Recover PC (SATA)
-find --set-root --ignore-floppies /submenu.lst
-configfile /submenu.lst
+find --set-root --ignore-floppies /easyPcRecovery/menus/submenu.lst
+configfile /easyPcRecovery/menus/submenu.lst
 
 title ^F5 F5 Recover PC (IDE)
-find --set-root --ignore-floppies /submenu-IDE.lst
-configfile /submenu-IDE.lst
+find --set-root --ignore-floppies /easyPcRecovery/menus/submenu-IDE.lst
+configfile /easyPcRecovery/menus/submenu-IDE.lst

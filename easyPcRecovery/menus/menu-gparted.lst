@@ -1,4 +1,6 @@
+#load key mappings
 find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey  
+
 timeout 10
 default 0
 

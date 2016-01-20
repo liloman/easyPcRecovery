@@ -120,16 +120,14 @@ REM THERE ISN´T AN EXTRA UNIT WITH ENOUGH FREE SPACE TO ALLOCATE ALMOST A BACKUP
 REM MUST PARTITIONATE THE CURRENT UNIT TO CREATE ANOTHER UNIT FROM THE FREE SPACE
 :CH_GPARTED
 if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
-if not exist %systemdrive%\easyPcRecovery\clonezilla mkdir %systemdrive%\easyPcRecovery\clonezilla
 if not exist %systemdrive%\easyPcRecovery\gparted mkdir %systemdrive%\easyPcRecovery\gparted
 if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin (
  echo Saving MBR to %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
  easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
 )
-echo Preparing menu
+echo Copying menu.lst and grldr to %systemdrive%
 copy /Y /V easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst
 copy /Y /V easyPcRecovery\menus\grldr %systemdrive%\
-copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezilla
 
 if not exist gparted*.zip (
 echo Downloading the Gparted iso
@@ -143,20 +141,20 @@ move /Y gparted*.zip easyPcRecovery\
 if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
 
 echo Installing Gparted on MBR
-\easyPcRecovery\clonezilla\grubinst.exe  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
+easyPcRecovery\clonezilla\grubinst.exe  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
 if %ERRORLEVEL% NEQ 0 ( 
   echo.
   echo.
   echo Something was wrong with grubinst.exe
-  echo You have backups in 3 places:
+  echo You have 3 backups in place:
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  ^(mbrfix^)
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(grub^)   
   echo Your second sector on your hard disk ^(grub^)
-  echo You can run (into the directory you downloaded this software): 
+  echo You can restore the old mbr (into the directory you downloaded this software) with ANY of this: 
   echo easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  
-  echo or
+  echo OR
   echo easyPcRecovery\clonezilla\grubinst.exe --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(hd0^) 
-  echo or even
+  echo OR even
   echo easyPcRecovery\clonezilla\grubinst.exe --restore-prevmbr ^(hd0^) 
   pause 
   GOTO :EXIT
@@ -174,12 +172,11 @@ SET /P input="Are you sure you want to install easyPcRecovery into %bdrive%? (Y/
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 
-echo Copying menus to %systemdrive%\
-copy /Y /V easyPcRecovery\menus\*.lst %systemdrive%\
+echo Copying menu.lst and grldr to %systemdrive%\
+copy /Y /V easyPcRecovery\menus\menu.lst %systemdrive%\
 copy /Y /V easyPcRecovery\menus\grldr %systemdrive%\
 
-if not exist %systemdrive%\easyPcRecovery\clonezilla mkdir %systemdrive%\easyPcRecovery\clonezilla
-copy /Y /V easyPcRecovery\clonezilla\hotkey %systemdrive%\easyPcRecovery\clonezilla
+if not exist %systemdrive%\easyPcRecovery mkdir %systemdrive%\easyPcRecovery
 attrib +s +h %systemdrive%\*.lst
 attrib +s +h %systemdrive%\grldr
 attrib +s +h %systemdrive%\easyPcRecovery
@@ -215,6 +212,8 @@ move /Y slitaz*.iso extras\slitaz\slitaz.iso
 
 echo Deleting zips...
 del *.zip
+echo Deleting old files from gparted
+del %systemdrive%\easyPcRecovery\gparted 
 
 echo Installing MBR into %systemdrive%...
 if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
