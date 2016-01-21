@@ -8,9 +8,9 @@ For documentation go to the [Wiki](https://github.com/liloman/easyPcRecovery/wik
 
 ###TODO
 
-- [ ] Make youtube videos/tutorial and make a tutorial with images! :S
-- [ ] Multilanguage (spanish...)
-- [ ] Add support for CD/USB live creation
-- [ ] Create minimal live with custom boot.fedoraproject.com
 - [x] Create uninstall
+- [ ] Add support for CD/USB live creation (in progress...)
+- [ ] Make youtube videos/tutorial and make a tutorial with images! :fire:
+- [ ] Multilanguage support (spanish...)
+- [ ] Create minimal live with custom boot.fedoraproject.com
 
