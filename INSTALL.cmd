@@ -89,8 +89,6 @@ set BDRIVE=!mapArray[%ch%]!
 REM remove trailing spaces
 CALL :TRIM !bdrive! bdrive 
 
-echo !bdrive! is going to be the disk to save the backups.
-
 GOTO :CH_INSTALL
 
 
@@ -126,9 +124,9 @@ if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin (
  easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
 )
 echo Copying menu.lst and grldr to %systemdrive%
-copy /Y easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst
+copy /Y easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-copy /Y easyPcRecovery\menus\grldr %systemdrive%\
+copy /Y easyPcRecovery\menus\grldr %systemdrive%\ > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 if not exist gparted*.zip (
@@ -173,11 +171,16 @@ REM THERE IS AN EXTRA UNIT WITH ENOUGH FREE SPACE
 SET /P input="Are you sure you want to install easyPcRecovery into %bdrive%? (Y/N):"
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
+REM Be sure to unhide before install to prevent error for copy hide files
+@cmd /c UnHideEverything.cmd > nul
+if exist %BDRIVE%\UnHideEverything.cmd (
+@cmd /c %BDRIVE%\UnHideEverything.cmd > nul
+)
 
 echo Copying menu.lst and grldr to %systemdrive%\
-copy /Y easyPcRecovery\menus\menu.lst %systemdrive%\
+copy /Y easyPcRecovery\menus\menu.lst %systemdrive%\  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-copy /Y easyPcRecovery\menus\grldr %systemdrive%\
+copy /Y easyPcRecovery\menus\grldr %systemdrive%\  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 if not exist %systemdrive%\easyPcRecovery mkdir %systemdrive%\easyPcRecovery
@@ -187,7 +190,7 @@ attrib +s +h %systemdrive%\easyPcRecovery
 
 REM Copy files to the backup drive
 echo Copying files to %BDRIVE%...
-xcopy . %BDRIVE%\ /s /k /y /q
+xcopy . %BDRIVE%\ /s /k /y /q > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 cd /D %BDRIVE%\easyPcRecovery
@@ -265,7 +268,7 @@ del /S %systemdrive%\easyPcRecovery\gparted
 
 echo Hiding files...
 cd ..
-@cmd /c HideEverything.cmd
+@cmd /c HideEverything.cmd > nul
 
 
 echo.
@@ -279,7 +282,7 @@ pause
 EXIT /B
 
 :ERROR
-echo Something went wrong with ERRORLEVEL: %ERRORLEVEL% 
+echo Something went wrong. ERRORLEVEL:%ERRORLEVEL% 
 GOTO :EXIT
 
 :TRIM
