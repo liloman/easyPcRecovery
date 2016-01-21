@@ -69,7 +69,7 @@ REM :CH_DRIVE
 
 if %count%==0 ( 
  echo You don´t have any unit with enough free space. 
- goto :EXIT; 
+ goto :ERROR; 
 )
 
 echo Which unit do you want to use for backups? 
@@ -78,7 +78,7 @@ if %ch% EQU q (GOTO :EXIT)
 
 if %ch% gtr %count% ( 
  echo Incorrect number %ch%!!
- GOTO :EXIT
+ GOTO :ERROR
 )
 
 if "!mapArray[%ch%]!"=="%systemdrive%" ( 
@@ -126,19 +126,21 @@ if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin (
  easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
 )
 echo Copying menu.lst and grldr to %systemdrive%
-copy /Y /V easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst
-copy /Y /V easyPcRecovery\menus\grldr %systemdrive%\
+copy /Y easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+copy /Y easyPcRecovery\menus\grldr %systemdrive%\
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 if not exist gparted*.zip (
 echo Downloading the Gparted iso
-easyPcRecovery\bin\wget http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
-if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
+easyPcRecovery\bin\wget --no-check-certificate -c -q --show-progress http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 )
 
 easyPcRecovery\bin\7za.exe e -o%systemdrive%\easyPcRecovery\gparted gparted*.zip live/*
-if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 move /Y gparted*.zip easyPcRecovery\
-if %ERRORLEVEL% NEQ 0 (  GOTO :EXIT )
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 echo Installing Gparted on MBR
 easyPcRecovery\clonezilla\grubinst.exe  --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  --force-backup-mbr (hd0)
@@ -173,8 +175,10 @@ if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 
 echo Copying menu.lst and grldr to %systemdrive%\
-copy /Y /V easyPcRecovery\menus\menu.lst %systemdrive%\
-copy /Y /V easyPcRecovery\menus\grldr %systemdrive%\
+copy /Y easyPcRecovery\menus\menu.lst %systemdrive%\
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+copy /Y easyPcRecovery\menus\grldr %systemdrive%\
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 if not exist %systemdrive%\easyPcRecovery mkdir %systemdrive%\easyPcRecovery
 attrib +s +h %systemdrive%\*.lst
@@ -183,43 +187,46 @@ attrib +s +h %systemdrive%\easyPcRecovery
 
 REM Copy files to the backup drive
 echo Copying files to %BDRIVE%...
-xcopy . %BDRIVE%\ /s /e /k /y
+xcopy . %BDRIVE%\ /s /k /y /q
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 cd /D %BDRIVE%\easyPcRecovery
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM Download
-echo Downloading the ISOs
-bin\wget --no-check-certificate -nc -i bin\urls.txt
+echo Downloading the ISOs. Be patient it will take a while. :)
+bin\wget --no-check-certificate -c -q --show-progress -i bin\urls.txt
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM Clonezilla
-echo Clonezilla...
-bin\7za.exe x -oclonezilla/ clonezilla*.zip live/*
+echo Copying Clonezilla...
+bin\7za.exe x -y -bd -oclonezilla/ clonezilla*.zip live/* > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
-REM REM Gparted
-echo Gparted...
-bin\7za.exe e -ogparted gparted*.zip live/*
+REM Gparted
+echo Copying Gparted...
+bin\7za.exe e  -y -bd -ogparted gparted*.zip live/* > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM Plop
-echo Plop...
-mkdir extras
-bin\7za.exe x plpbt*.zip plpbt-5.0.15/plpbt.bin
+echo Copying Plop...
+if not exist extras mkdir extras
+bin\7za.exe x  -y -bd plpbt*.zip plpbt-5.0.15/plpbt.bin > nul
 move /Y plpbt-5.0.15 extras\plop
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM slitaz
-echo Slitaz...
-mkdir extras\slitaz
+echo Moving Slitaz...
+if not exist extras\slitaz mkdir extras\slitaz
 move /Y slitaz*.iso extras\slitaz\slitaz.iso
-
-echo Deleting zips...
-del *.zip
-echo Deleting old files from gparted
-del %systemdrive%\easyPcRecovery\gparted 
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 echo Installing MBR into %systemdrive%...
 if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
 if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin (
  echo Saving MBR to %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
  mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin
+ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 )
 
 clonezilla\grubinst.exe --save=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  --force-backup-mbr (hd0)
@@ -234,20 +241,27 @@ if  %ERRORLEVEL% NEQ 0 (
   echo Your second sector on your hard disk ^(grub^)
   echo You can run: 
   echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin  
-  echo or 
+  echo OR 
   echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(hd0^) 
-  echo or even
+  echo OR even
   echo  %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore-prevmbr ^(hd0^)
-  echo IF you partitionated your hard disk you have 2 more MBR backups:
+  echo IF you partitionated your hard disk before with this software you have even 2 more MBR backups:
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  ^(mbrfix^)
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin  ^(grub^)   
   echo You can try ONE OF THESE FIRST in this order, to get your original boot menu back: 
   echo %BDRIVE%\easyPcRecovery\mbrfix\mbrfix.exe /drive 0 restorembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin  
   echo or
   echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore=%systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted-grub.bin ^(hd0^)
-  pause 
-  GOTO :EXIT
+  GOTO :ERROR
  )
+
+echo Deleting downloaded zips...
+del *.zip
+if exist %systemdrive%\easyPcRecovery\gparted  (
+echo Deleting old files from gparted menu
+del /S %systemdrive%\easyPcRecovery\gparted 
+)
+
 
 echo Hiding files...
 cd ..
@@ -264,12 +278,16 @@ pause
 	
 EXIT /B
 
+:ERROR
+echo Something went wrong with ERRORLEVEL: %ERRORLEVEL% 
+GOTO :EXIT
+
 :TRIM
 SET %2=%1
 GOTO :EOF
 
 :EXIT
-echo Exit
+echo Exiting. Press any key to exit.
 pause
 exit /B
 cmd /c exit -1073741510
