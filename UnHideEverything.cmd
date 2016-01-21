@@ -7,4 +7,4 @@ attrib -s -h \HideEverything.cmd
 attrib -s -h %systemdrive%\*.lst
 attrib -s -h %systemdrive%\grldr
 attrib -s -h %systemdrive%\easyPcRecovery
-attrib -s -h \*.txt
+attrib -s -h \README.md

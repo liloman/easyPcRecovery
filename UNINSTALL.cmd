@@ -24,7 +24,7 @@ cd /D %BDRIVE%\
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 echo Uninstalling from %BDRIVE%...
-del README.txt TODO.txt 
+del README.md
 del UnHideEverything.cmd HideEverything.cmd 
 del pruebaCD.cmd pruebaUSB.cmd 
 del INSTALL.cmd UNINSTALL.cmd
