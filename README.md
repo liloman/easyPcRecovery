@@ -2,9 +2,9 @@
 
 ###INFO 
 
-For videos about workflow/installation go to the [https://liloman.github.io/easyPcRecovery/](Webpage)
+For videos about workflow/installation go to the [Webpage](https://liloman.github.io/easyPcRecovery/)
 
-For documentation go to the [https://github.com/liloman/easyPcRecovery/wiki](Wiki)
+For documentation go to the [Wiki](https://github.com/liloman/easyPcRecovery/wiki)
 
 ###TODO
 
