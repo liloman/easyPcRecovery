@@ -31,7 +31,7 @@ find --set-root --devices=h /ntldr
 chainloader /ntldr
 
 
-title ^F5 F5 Recover Windows XP Backup 
+title ^F5 F5 Recover Windows XP Backup from %BAKDRV% to %WDRV%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
@@ -47,7 +47,7 @@ title ^F7 F7 Boot clonezilla (manual)
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUN% ocs_live_batch="no"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-title ^F8 F8 GParted live (partitioning)
+title ^F8 F8 GParted live (partitioning) from %BAKDRV%
 set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
 set RUN=live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs 
 kernel /easyPcRecovery/gparted/vmlinuz %BOPT% %RUN% %LOCALES% gl_batch union=aufs
