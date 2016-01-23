@@ -15,6 +15,22 @@ IF %ERRORLEVEL% NEQ 0 (
 REM Reset errorlevel
 VER > NUL 
 
+echo Where do you want to install it? 
+echo 1)HD
+echo 2)Pendrive
+echo 3)CD
+SET /P OPTDEST="Choose a number (Press q to exit):"
+if %OPTDEST% EQU q (GOTO :EXIT)
+
+if %OPTDEST% equ 1 GOTO :OPT_HD
+if %OPTDEST% equ 2 GOTO :OPT_PEN
+if %OPTDEST% equ 3 GOTO :OPT_CD
+
+echo Incorrect number %OPTDEST%!!
+GOTO :ERROR
+
+REM INSTALL ON HD
+:OPT_HD
 for /F "tokens=1-2" %%a in ('wmic logicaldisk where "DeviceID='%systemdrive%'" get DeviceID^, DriveType^| find ":"') do (
    For /f "usebackq delims== tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get FreeSpace /format:value`) do set FreeSpace=%%x
    For /f "usebackq delims== tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get Size /format:value`) do set Size=%%x
@@ -65,8 +81,6 @@ for /F "tokens=1-2" %%a in ('wmic logicaldisk get DeviceID^, DriveType^| find ":
 	)	
 )
 
-REM :CH_DRIVE
-
 if %count%==0 ( 
  echo You don´t have any unit with enough free space. 
  goto :ERROR; 
@@ -111,18 +125,17 @@ IF %ERRORLEVEL% NEQ 0 (
   pause > nul
   defrag %systemdrive%
   set BDRIVE=%systemdrive%
-  GOTO :CH_GPARTED
-)
+ )
 
 REM THERE ISN´T AN EXTRA UNIT WITH ENOUGH FREE SPACE TO ALLOCATE ALMOST A BACKUP
 REM MUST PARTITIONATE THE CURRENT UNIT TO CREATE ANOTHER UNIT FROM THE FREE SPACE
-:CH_GPARTED
 if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
 if not exist %systemdrive%\easyPcRecovery\gparted mkdir %systemdrive%\easyPcRecovery\gparted
 if not exist %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin (
  echo Saving MBR to %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
  easyPcRecovery\mbrfix\mbrfix.exe /drive 0 savembr %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-gparted.bin
 )
+
 echo Copying menu.lst and grldr to %systemdrive%
 copy /Y easyPcRecovery\menus\menu-gparted.lst %systemdrive%\menu.lst  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
@@ -193,10 +206,17 @@ echo Copying files to %BDRIVE%...
 xcopy . %BDRIVE%\ /s /k /y /q > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
-cd /D %BDRIVE%\easyPcRecovery
+cd /D %BDRIVE%\
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
-REM Download
+REM Function for download and copy the files
+:FUN_DOWN_COPY
+
+REM Change to workdir
+cd easyPcRecovery
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+REM Download ISO/zips
 echo Downloading the ISOs. Be patient it will take a while. :)
 bin\wget --no-check-certificate -c -q --show-progress -i bin\urls.txt
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
@@ -208,21 +228,43 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM Gparted
 echo Copying Gparted...
-bin\7za.exe e  -y -bd -ogparted gparted*.zip live/* > nul
+bin\7za.exe x  -y -bd -ogparted gparted*.zip live/* > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM Plop
 echo Copying Plop...
 if not exist extras mkdir extras
 bin\7za.exe x  -y -bd plpbt*.zip plpbt-5.0.15/plpbt.bin > nul
-move /Y plpbt-5.0.15 extras\plop
+if exist extras\plop rmdir /s /q extras\plop > nul
+move /Y plpbt-5.0.15 extras\plop > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 REM slitaz
-echo Moving Slitaz...
+echo Coping Slitaz...
 if not exist extras\slitaz mkdir extras\slitaz
-move /Y slitaz*.iso extras\slitaz\slitaz.iso
+copy /V /Y slitaz*.iso extras\slitaz\slitaz.iso > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+REM Old gparted files
+if exist %systemdrive%\easyPcRecovery\gparted  (
+echo Deleting old gparted installation dir
+rmdir /Q /S %systemdrive%\easyPcRecovery\gparted > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+)
+
+REM Ask to remove downloaded files
+SET /P delin="Do you want to delete the downloaded files? (Y/N):"
+if /I "%delin%"=="Y" (
+echo Deleting downloaded zips...
+del *.zip
+del *.iso
+)
+
+REM Depends on the choosen option
+if %OPTDEST% equ 1 set MBR=%systemdrive%
+if %OPTDEST% equ 2 GOTO :OPT_PEN
+if %OPTDEST% equ 3 GOTO :FINISH_CD
+
 
 echo Installing MBR into %systemdrive%...
 if not exist %systemdrive%\easyPcRecovery\mbrbackups mkdir %systemdrive%\easyPcRecovery\mbrbackups
@@ -238,7 +280,7 @@ if  %ERRORLEVEL% NEQ 0 (
   echo.
   echo      ERROR
   echo Something was wrong with grubinst.exe
-  echo You have backups in 3 places:
+  echo You have 3 backups in place:
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install.bin  ^(mbrfix^)
   echo %systemdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  ^(grub^)   
   echo Your second sector on your hard disk ^(grub^)
@@ -258,18 +300,9 @@ if  %ERRORLEVEL% NEQ 0 (
   GOTO :ERROR
  )
 
-echo Deleting downloaded zips...
-del *.zip
-if exist %systemdrive%\easyPcRecovery\gparted  (
-echo Deleting old files from gparted menu
-del /S %systemdrive%\easyPcRecovery\gparted 
-)
-
-
 echo Hiding files...
 cd ..
 @cmd /c HideEverything.cmd > nul
-
 
 echo.
 echo.
@@ -277,9 +310,40 @@ echo ===============FINISHED===============
 echo Reboot and make your fresh first backup right now if you want it.
 echo Press F4 on the boot menu to see the avaliable options.
 echo ===============FINISHED===============
+
+pause 
+EXIT /B
+
+
+:OPT_CD
+echo Copying menus to %cd%
+copy /Y  easyPcRecovery\menus\*.lst . > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+copy /Y easyPcRecovery\menus\grldr . > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+REM Download and copy files 
+GOTO :FUN_DOWN_COPY
+
+:FINISH_CD
+
+cd ..
+call EasyPcRecovery\ISO\makegrub4dosiso.cmd ..\..\easyPcRecovery.iso %cd%  easyPcRecovery
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+echo.
+echo.
+echo ===============FINISHED===============
+echo You can record %cd%\easyPcRecovery.iso on a CD (software not included)
+echo and then boot the pc with it inserted in the tray
+echo to boot easyPcRecovery.
+echo If you only have one unit you could boot to gparted and do the partitioning there,
+echo even you can set the hidden flag for the new partition if you want it.
+echo ===============FINISHED===============
 pause 
 	
 EXIT /B
+
 
 :ERROR
 echo Something went wrong. ERRORLEVEL:%ERRORLEVEL% 

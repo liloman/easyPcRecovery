@@ -1,16 +1,27 @@
-#Set root
-#find --set-root --ignore-floppies /easyPcRecovery/clonezilla/hotkey  
 # clear the display to keep it clean!
 clear
-# allow text output from any future commands  so we can debug the menu items
+# allow text output from any future commands  so 
+# we can debug the menu items and use find to set vars
 debug on
 
-#find windows drive
-find /windows/explorer.exe  | set WDRV=
-#find backup drive and set root
-find --set-root /easyPcRecovery/clonezilla/live/vmlinuz | set BAKDRV=
+# Finds equipment the device is set to first find the current device. 
+# Default search order: ud, pxe, network equipment, hard disk, CD-ROM, floppy disk
+# --devices=upnhcf
+
+#find windows drive with errors 
+find --set-root --devices=h /windows/explorer.exe  
+#find windows drive without errors... ¿?
+find --devices=h /windows/explorer.exe  | set OTITLE=
+
+# to order find by disks first for DTITLE ...
+# https://github.com/chenall/grub4dos/issues/93
+root (hd0,0)
+find --set-root --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz 
+#find backup drive first in hd and then in cd-roms  (and set-root for real? :S)
+find --set-root --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz | set DTITLE=
 
 # find source volume for Windows and our backup volume 
+find --set-root --devices=hc /easyPcRecovery/menus/getDisks.g4b
 # should autodetect and use hda instead of sda if IDE HDD 
 command /easyPcRecovery/menus/getDisks.g4b
 
@@ -26,28 +37,33 @@ set PRERUN=ocs_prerun="mount /dev/%BAKDRV% /mnt" ocs_prerun1="mount --bind /mnt/
 timeout 25
 default 0
 
-title ^F3 F3 Boot Windows XP
+iftitle [find --devices=h /ntldr] ^F3 F3 Boot Windows XP from %WDRIVE%
 find --set-root --devices=h /ntldr
 chainloader /ntldr
 
+iftitle [ if %DTITLE% EQU "" ] You need a partition/disk with a clonezilla installation
+find --devices=h 
 
-title ^F5 F5 Recover Windows XP Backup from %BAKDRV% to %WDRV%
+iftitle [ if %DTITLE% EQU "(CD)" ] You need a partition/disk with a clonezilla installation apart from CD
+find --devices=h 
+
+iftitle [ if not %DTITLE%=="(CD)" && if not %DTITLE%="" ] ^F5 F5 Recover Windows XP Backup from %DTITLE% to %OTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-title ^F6 F6 Backup Windows XP from %WDRV% to %BAKDRV%
+iftitle [ if not %DTITLE%=="(CD)" && if not %DTITLE%="" ] ^F6 F6 Backup Windows XP from %OTITLE% to %DTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -q2 -sc -rm-win-swap-hib -c --batch -j2 -z1 -i 2000 -p reboot saveparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-title ^F7 F7 Boot clonezilla (manual)
+iftitle [ if not %DTITLE%=="(CD)" && if not %DTITLE%="" ] ^F7 F7 Boot clonezilla (manual) from %DTITLE%
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUN% ocs_live_batch="no"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-title ^F8 F8 GParted live (partitioning) from %BAKDRV%
+title ^F8 F8 GParted live (partitioning) from %DTITLE%
 set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
 set RUN=live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs 
 kernel /easyPcRecovery/gparted/vmlinuz %BOPT% %RUN% %LOCALES% gl_batch union=aufs

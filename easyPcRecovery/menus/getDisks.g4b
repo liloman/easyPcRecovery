@@ -4,23 +4,46 @@
 :: %% = %%% in batch files...
 
 :: string of letters
-set abc=abcdefgh
+set abc=abcdefghijk
 
-:: for WDRV
-set /a big=%WDRV:~3,1%
-set /a small=%WDRV:~5,1%
+:: If doesn't have ANY clonezilla installation
+if %DTITLE%=="" GOTO :END
+
+set HD1=YES%OTITLE%
+set HD12=YES2!OTITLE!
+
+:: If it is NOT a cd-rom with a clonezilla installation
+if not %DTITLE%=="(cd)" (
+set HD2=YES%OTITLE%
+set HD22=YES2!OTITLE!
+:: for OTITLE
+set /a big=%OTITLE:~3,1%
+set /a small=%OTITLE:~5,1%
 set /a part=%small%+1
 set cmd=abc:~%big%,1
 
 call set letter=%%%cmd%%%
 set WDRV=sd%letter%%%part%
 
-:: for BAKDRV
-set /a big=%BAKDRV:~3,1%
-set /a small=%BAKDRV:~5,1%
+:: for DTITLE
+set /a big=%DTITLE:~3,1%
+set /a small=%DTITLE:~5,1%
 set /a part=%small%+1
 set cmd=abc:~%big%,1
 
 call set letter=%%%cmd%%%
 set BAKDRV=sd%letter%%%part%
+
+)else (
+:: If it is a cd-rom with a clonezilla installation
+set HD3=YES%OTITLE%
+set HD32=YES2!OTITLE!
+
+ set BAKDRV=sr0
+ set DTITLE=CD
+ set OTITLE=CD
+)
+
+:END
+
 
