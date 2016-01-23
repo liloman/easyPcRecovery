@@ -208,6 +208,9 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 cd /D %BDRIVE%\
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+REM IF INSTALLING FROM CD-ROM INSTALLATION MAKE SURE THE FLAG IS THERE 
+echo Restoring backup flag 
+echo. > easyPcRecovery\clonezilla\images\images_are_stored_here.txt 
 
 REM Function for download and copy the files
 :FUN_DOWN_COPY
@@ -328,6 +331,9 @@ GOTO :FUN_DOWN_COPY
 :FINISH_CD
 
 cd ..
+echo Deleting backup flag 
+del /Q easyPcRecovery\clonezilla\images\images_are_stored_here.txt > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 call EasyPcRecovery\ISO\makegrub4dosiso.cmd ..\..\easyPcRecovery.iso %cd%  easyPcRecovery
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 

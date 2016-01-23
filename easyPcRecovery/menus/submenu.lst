@@ -33,37 +33,33 @@ set RUN=ocs_live_run="ocs-live-general" live-media-path=/easyPcRecovery/clonezil
 #For recovery/backup only
 set PRERUN=ocs_prerun="mount /dev/%BAKDRV% /mnt" ocs_prerun1="mount --bind /mnt/easyPcRecovery/clonezilla/images /home/partimag/"
 
-
 timeout 25
 default 0
 
-iftitle [find --devices=h /ntldr] ^F3 F3 Boot Windows XP from %WDRIVE%
+iftitle [ if not exist %SHOW%/easyPcRecovery/clonezilla/live/vmlinuz ] You need a partition/disk with a clonezilla installation
+echo You need a partition/disk with a clonezilla installation
+
+iftitle [find --devices=h /ntldr] ^F3 F3 Boot Windows XP from %OTITLE%
 find --set-root --devices=h /ntldr
 chainloader /ntldr
 
-iftitle [ if %DTITLE% EQU "" ] You need a partition/disk with a clonezilla installation
-find --devices=h 
-
-iftitle [ if %DTITLE% EQU "(CD)" ] You need a partition/disk with a clonezilla installation apart from CD
-find --devices=h 
-
-iftitle [ if not %DTITLE%=="(CD)" && if not %DTITLE%="" ] ^F5 F5 Recover Windows XP Backup from %DTITLE% to %OTITLE%
+iftitle [ if exist %DTITLE%/easyPcRecovery/clonezilla/images/images_are_stored_here.txt  ] ^F5 F5 Recover Windows XP Backup from %DTITLE% to %OTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-iftitle [ if not %DTITLE%=="(CD)" && if not %DTITLE%="" ] ^F6 F6 Backup Windows XP from %OTITLE% to %DTITLE%
+iftitle [ if exist %DTITLE%/easyPcRecovery/clonezilla/images/images_are_stored_here.txt  ] ^F6 F6 Backup Windows XP from %OTITLE% to %DTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -q2 -sc -rm-win-swap-hib -c --batch -j2 -z1 -i 2000 -p reboot saveparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-iftitle [ if not %DTITLE%=="(CD)" && if not %DTITLE%="" ] ^F7 F7 Boot clonezilla (manual) from %DTITLE%
+iftitle [ if exist %DTITLE%/easyPcRecovery/clonezilla/live/vmlinuz  ] ^F7 F7 Boot clonezilla (manual) from %DTITLE%
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUN% ocs_live_batch="no"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-title ^F8 F8 GParted live (partitioning) from %DTITLE%
+iftitle [ if exist %DTITLE%/easyPcRecovery/gparted/vmlinuz ] ^F8 F8 GParted live (partitioning) from %DTITLE%
 set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
 set RUN=live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs 
 kernel /easyPcRecovery/gparted/vmlinuz %BOPT% %RUN% %LOCALES% gl_batch union=aufs

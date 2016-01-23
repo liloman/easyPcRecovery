@@ -6,16 +6,14 @@
 :: string of letters
 set abc=abcdefghijk
 
-:: If doesn't have ANY clonezilla installation
-if %DTITLE%=="" GOTO :END
+:: If does NOT have ANY clonezilla installation
+set DTITLE
+IF %ERRORLEVEL% NEQ 0 GOTO :NOTHING
 
-set HD1=YES%OTITLE%
-set HD12=YES2!OTITLE!
+:: If it is NOT A CD-ROM with a clonezilla installation
+if not %DTITLE%==(cd) (
 
-:: If it is NOT a cd-rom with a clonezilla installation
-if not %DTITLE%=="(cd)" (
-set HD2=YES%OTITLE%
-set HD22=YES2!OTITLE!
+:: It is HD then
 :: for OTITLE
 set /a big=%OTITLE:~3,1%
 set /a small=%OTITLE:~5,1%
@@ -34,15 +32,19 @@ set cmd=abc:~%big%,1
 call set letter=%%%cmd%%%
 set BAKDRV=sd%letter%%%part%
 
-)else (
-:: If it is a cd-rom with a clonezilla installation
-set HD3=YES%OTITLE%
-set HD32=YES2!OTITLE!
+set SHOW=%BAKDRV%
 
+)else (
+:: If it IS A CD-ROM with a clonezilla installation
+ set SHOW=(hd0,0)
  set BAKDRV=sr0
  set DTITLE=CD
  set OTITLE=CD
-)
+ )
+GOTO :END
+
+:NOTHING
+set SHOW=(hd0,0)
 
 :END
 
