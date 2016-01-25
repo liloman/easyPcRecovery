@@ -26,7 +26,7 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 echo Uninstalling from %BDRIVE%...
 del README.md
 del UnHideEverything.cmd HideEverything.cmd 
-del pruebaCD.cmd pruebaUSB.cmd 
+del pruebaUSB.cmd 
 del INSTALL.cmd UNINSTALL.cmd
 
 SET /P input="Do you want to delete all your backups from %BDRIVE%? (Y/N):"
