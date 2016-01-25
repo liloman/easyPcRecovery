@@ -319,8 +319,8 @@ EXIT /B
 
 
 :OPT_CD
-echo Copying menus to %cd%
-copy /Y  easyPcRecovery\menus\*.lst . > nul
+echo Copying menu.lst to %cd%
+copy /Y  easyPcRecovery\menus\menu.lst . > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 copy /Y easyPcRecovery\menus\grldr . > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )

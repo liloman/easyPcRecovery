@@ -29,7 +29,7 @@ if not exist %SRCFOLDER%\%BOOTFILE% echo ERROR: %BOOTFILE% NOT FOUND IN %SRCFOLD
 
 REM echo USING MKISOFS COMMAND
 echo Creating %ISONAME% file. Please be patient
-echo mkisofs -quiet -m *.iso -m *.zip  -iso-level 3 -l -D -d -J -joliet-long -r -volid "%VNAME%" -A GRLDR/MKISOFS -sysid "Win32" -b %BOOTFILE% -no-emul-boot -boot-load-seg 0x7C0 -boot-load-size 4 -allow-multidot -hide grldr -hide boot.catalog -o %ISONAME% %SRCFOLDER%
+echo mkisofs -quiet slitaz-*.iso -m *.zip  -iso-level 3 -l -D -d -J -joliet-long -r -volid "%VNAME%" -A GRLDR/MKISOFS -sysid "Win32" -b %BOOTFILE% -no-emul-boot -boot-load-seg 0x7C0 -boot-load-size 4 -allow-multidot -hide grldr -hide boot.catalog -o %ISONAME% %SRCFOLDER%
 REM echo.
 
 mkisofs -quiet -m *.iso -m *.zip  -iso-level 3 -l -D -d -J -joliet-long -r -volid "%VNAME%" -A GRLDR/MKISOFS -sysid "Win32" -b %BOOTFILE% -no-emul-boot -boot-load-seg 0x7C0  -boot-load-size 4 -allow-multidot -hide grldr -hide boot.catalog -o %ISONAME% %SRCFOLDER%
