@@ -16,3 +16,5 @@ For documentation go to the [Wiki](https://github.com/liloman/easyPcRecovery/wik
 - [ ] Multilanguage support (spanish...)
 - [ ] Create minimal live with custom boot.fedoraproject.com
 
+###Fixes
+- [ ] Fix hotkeys

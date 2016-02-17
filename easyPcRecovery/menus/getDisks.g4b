@@ -14,7 +14,8 @@ set abc=abcdefghijk
 :: )
 
 :: If it IS A CD-ROM with a clonezilla installation
-if %DTITLE% EQU (cd) (
+if not "%DTITLE%"=="(cd)" goto :HD
+
  :: for OTITLE
 set /a big=%OTITLE:~3,1%
 set /a small=%OTITLE:~5,1%
@@ -27,9 +28,12 @@ set WDRV=sd%letter%%%part%
  set DTITLE=CD
  set OTITLE=CD
 
+goto :EOF
+
 :: It is a HD installation then
-)else(
 :: for OTITLE
+
+:HD
 set /a big=%OTITLE:~3,1%
 set /a small=%OTITLE:~5,1%
 set /a part=%small%+1
@@ -46,8 +50,6 @@ set cmd=abc:~%big%,1
 
 call set letter=%%%cmd%%%
 set BAKDRV=sd%letter%%%part%
-)
+
 
 :END
-
-
