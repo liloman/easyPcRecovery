@@ -106,6 +106,82 @@ CALL :TRIM !bdrive! bdrive
 GOTO :CH_INSTALL
 
 
+REM INSTALL ON PENDRIVE
+:OPT_PEN
+
+echo Scaning for removable disks
+for /F "tokens=1" %%a in ('wmic logicaldisk where "drivetype=2" get DeviceID^| find ":"') do (
+   For /f "usebackq delims=, tokens=2" %%x in (`wmic logicaldisk where "DeviceID='%%a'" get volumeName /format:csv`) do SET volName=%%x
+	set /a count+=1
+	set mapArray[!count!]=%%a	
+    REM remove trailing spaces
+    CALL :TRIM !volName! volName
+	CALL :TRIM %%a a
+    echo !count!^) %%a^(!volName!^)	
+)	
+
+if %count%==0 ( 
+ echo Insert any removable disk and excute it again. 
+ GOTO :EXIT; 
+)
+
+echo Which removable disk do you want to use for backups? 
+SET /P ch="Choose a number (Press q to exit):"
+if %ch% EQU q (GOTO :EXIT)
+
+if %ch% gtr %count% ( 
+ echo Incorrect number %ch%!!
+ GOTO :EXIT
+)
+
+set BDRIVE=!mapArray[%ch%]!
+REM remove trailing spaces
+CALL :TRIM !bdrive! bdrive 
+
+SET /P input="Are you sure you want to install easyPcRecovery into %BDRIVE%? (Y/N):"
+if /I not "%input%"=="Y" ( GOTO :EXIT )
+
+REM Be sure to unhide before install to prevent error for copy hide files
+@cmd /c UnHideEverything.cmd > nul
+if exist %BDRIVE%\UnHideEverything.cmd (
+@cmd /c %BDRIVE%\UnHideEverything.cmd > nul
+)
+
+echo Copying menu.lst and grldr to %BDRIVE%\
+copy /Y easyPcRecovery\menus\menu.lst %BDRIVE%\  > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+copy /Y easyPcRecovery\menus\grldr %BDRIVE%\  > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+if not exist %BDRIVE%\easyPcRecovery mkdir %BDRIVE%\easyPcRecovery
+attrib +s +h %BDRIVE%\*.lst
+attrib +s +h %BDRIVE%\grldr
+attrib +s +h %BDRIVE%\easyPcRecovery
+
+REM Copy files to the pendrive
+echo Copying files to %BDRIVE%...
+xcopy . %BDRIVE%\ /s /k /y /q > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+cd /D %BDRIVE%\
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+REM IF INSTALLING TO PENDRIVE MAKE SURE THE FLAG IS THERE ?
+REM echo Restoring backup flag 
+REM echo. > easyPcRecovery\clonezilla\images\images_are_stored_here.txt 
+
+REM Download and copy files 
+GOTO :FUN_DOWN_COPY
+
+:OPT_CD
+echo Copying menu.lst to %cd%
+copy /Y  easyPcRecovery\menus\menu.lst . > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+copy /Y easyPcRecovery\menus\grldr . > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+REM Download and copy files 
+GOTO :FUN_DOWN_COPY
+
 
 :CH_FSCHECK
 SET /P input="Are you sure you want to partitionate %systemdrive%? (Y/N):"
@@ -208,7 +284,7 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 cd /D %BDRIVE%\
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-REM IF INSTALLING FROM CD-ROM INSTALLATION MAKE SURE THE FLAG IS THERE 
+REM IF INSTALLING TO HD MAKE SURE THE FLAG IS THERE 
 echo Restoring backup flag 
 echo. > easyPcRecovery\clonezilla\images\images_are_stored_here.txt 
 
@@ -248,7 +324,7 @@ if not exist extras\slitaz mkdir extras\slitaz
 copy /V /Y slitaz*.iso extras\slitaz\slitaz.iso > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
-REM Old gparted files
+REM Old (legacy) gparted files
 if exist %systemdrive%\easyPcRecovery\gparted  (
 echo Deleting old gparted installation dir
 rmdir /Q /S %systemdrive%\easyPcRecovery\gparted > nul
@@ -263,9 +339,9 @@ del *.zip
 del *.iso
 )
 
-REM Depends on the choosen option
+REM Install on MBR (HD/PENDRIVE install) or create iso (CD)
 if %OPTDEST% equ 1 set MBR=%systemdrive%
-if %OPTDEST% equ 2 GOTO :OPT_PEN
+if %OPTDEST% equ 2 GOTO :FINISH_PEN
 if %OPTDEST% equ 3 GOTO :FINISH_CD
 
 
@@ -318,15 +394,6 @@ pause
 EXIT /B
 
 
-:OPT_CD
-echo Copying menu.lst to %cd%
-copy /Y  easyPcRecovery\menus\menu.lst . > nul
-if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-copy /Y easyPcRecovery\menus\grldr . > nul
-if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-
-REM Download and copy files 
-GOTO :FUN_DOWN_COPY
 
 :FINISH_CD
 
@@ -350,6 +417,44 @@ pause
 	
 EXIT /B
 
+:FINISH_PEN
+
+echo Installing MBR into %bdrive%...
+if not exist %bdrive%\easyPcRecovery\mbrbackups mkdir %bdrive%\easyPcRecovery\mbrbackups
+
+REM Get diskId
+for /F "skip=3 tokens=1-9  delims=#," %%a in ('cscript bin\getDiskId.vbs %bdrive%') do set diskId=hd%%b
+
+clonezilla\grubinst.exe --save=%bdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin  --no-backup-mbr (%diskId%)
+if  %ERRORLEVEL% NEQ 0 ( 
+  echo.
+  echo.
+  echo Something was wrong with grubinst.exe
+  echo You have a backup: in:
+  echo %bdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin    
+  echo To restore the old mbr on %bdrive% You can run: 
+  echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore=%bdrive%\easyPcRecovery\mbrbackups\mbr-pre-intall-grub.bin  ^(%diskId%^) 
+  pause 
+  GOTO :EXIT
+ )
+
+cd ..
+echo Deleting backup flag 
+del /Q easyPcRecovery\clonezilla\images\images_are_stored_here.txt > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+echo.
+echo.
+echo ===============FINISHED===============
+echo Now you can boot the pc with the pendrive inserted to boot easyPcRecovery.
+echo If you only have an unit you could boot to gparted and do the partitioning with it first,
+echo you can even set the hidden flag for the new partition if you want it.
+echo Otherwise reboot from USB and make your fresh first backup right now if you want it.
+echo Press F4 or down arrow on the new boot menu to see the avaliable options.
+echo ===============FINISHED===============
+
+pause 
+EXIT /B
 
 :ERROR
 echo Something went wrong. ERRORLEVEL:%ERRORLEVEL% 
