@@ -15,6 +15,9 @@ IF %ERRORLEVEL% NEQ 0 (
 REM Reset errorlevel
 VER > NUL 
 
+REM Remove the file
+if exist .gitignore del .gitignore > nul 
+
 echo Where do you want to install it? 
 echo 1)HD
 echo 2)Pendrive
@@ -413,6 +416,7 @@ EXIT /B
 
 :FINISH_PEN
 
+cd ..
 REM Copy files to the pendrive finally
 echo Copying files to %BDRIVE%...
 xcopy * %BDRIVE%\ /s /k /y /q > nul
@@ -421,8 +425,10 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 cd /D %BDRIVE%\
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
-echo Installing MBR into %bdrive%...
+
+if not exist %bdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin (
 if not exist %bdrive%\easyPcRecovery\mbrbackups mkdir %bdrive%\easyPcRecovery\mbrbackups
+echo Installing MBR into %bdrive%...
 
 REM Get diskId
 for /F "skip=3 tokens=1-9  delims=#," %%a in ('cscript bin\getDiskId.vbs %bdrive%') do set diskId=hd%%b
@@ -439,6 +445,7 @@ if  %ERRORLEVEL% NEQ 0 (
   pause 
   GOTO :EXIT
  )
+)
 
 echo.
 echo.
