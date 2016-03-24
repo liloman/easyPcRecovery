@@ -17,7 +17,7 @@ find --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz | set DTITLE=
 
 # find source volume for Windows and our backup volume  and set root for real :S
 find --set-root --devices=hc /easyPcRecovery/menus/getDisks.g4b 
-# should autodetect and use hda instead of sda if IDE HDD 
+# TODO: autodetect and use hda instead of sda if IDE HDD 
 command /easyPcRecovery/menus/getDisks.g4b
 
 #dont Use %LOCALES% by default...
@@ -36,16 +36,16 @@ find --set-root --devices=h /ntldr
 chainloader /ntldr
 
 # If false
-iftitle [ checkrange 0 find --devices=h /easyPcRecovery/clonezilla/images/images_are_stored_here.txt ] You need a partition/disk prepared for backups
-echo You need a partition/disk prepared for backups
+iftitle [ checkrange 0 find --devices=h /easyPcRecovery/easyPcRecovery.txt ] You need a partition/disk prepared for backups
+echo You need a partition/disk prepared for backups with the /easyPcRecovery/easyPcRecovery.txt file
 
-iftitle [ find --devices=h /easyPcRecovery/clonezilla/images/images_are_stored_here.txt  ] ^F5 F5 Recover Windows XP Backup from %DTITLE% to %OTITLE%
+iftitle [ find --devices=h /easyPcRecovery/easyPcRecovery.txt  ] ^F5 F5 Recover Windows XP Backup from %DTITLE% to %OTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-iftitle [ find --devices=h /easyPcRecovery/clonezilla/images/images_are_stored_here.txt  ] ^F6 F6 Backup Windows XP from %OTITLE% to %DTITLE%
+iftitle [ find --devices=h /easyPcRecovery/easyPcRecovery.txt  ] ^F6 F6 Backup Windows XP from %OTITLE% to %DTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -q2 -sc -rm-win-swap-hib -c --batch -j2 -z1 -i 2000 -p reboot saveparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
@@ -61,5 +61,5 @@ set RUN=live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=fil
 kernel /easyPcRecovery/gparted/vmlinuz %BOPT% %RUN% %LOCALES% gl_batch union=aufs
 initrd /easyPcRecovery/gparted/initrd.img
 
-title ^F9 F9 Extra Options (recovery console,Windows Vista/7,USB boot,Slitaz)
+iftitle [ find --devices=hc /easyPcRecovery/menus/extras.lst ] ^F9 F9 Extra Options (recovery console,Windows Vista/7,USB boot,Slitaz)
 configfile /easyPcRecovery/menus/extras.lst

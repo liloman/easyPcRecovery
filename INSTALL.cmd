@@ -142,10 +142,16 @@ SET /P input="Are you sure you want to install easyPcRecovery into %BDRIVE%? (Y/
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 REM Be sure to unhide before install to prevent error for copy hide files
+copy /Y UnHideEverything.cmd %BDRIVE%\  > nul
 @cmd /c UnHideEverything.cmd > nul
 if exist %BDRIVE%\UnHideEverything.cmd (
 @cmd /c %BDRIVE%\UnHideEverything.cmd > nul
 )
+
+REM Additional files for PENDRIVE
+attrib -s -h %BDRIVE%\menu.lst > nul
+attrib -s -h %BDRIVE%\grldr > nul
+attrib -s -h %BDRIVE%\easyPcRecovery > nul
 
 echo Copying menu.lst and grldr to %BDRIVE%\
 copy /Y easyPcRecovery\menus\menu.lst %BDRIVE%\  > nul
@@ -153,21 +159,8 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 copy /Y easyPcRecovery\menus\grldr %BDRIVE%\  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
-if not exist %BDRIVE%\easyPcRecovery mkdir %BDRIVE%\easyPcRecovery
-attrib +s +h %BDRIVE%\*.lst
+attrib +s +h %BDRIVE%\menu.lst
 attrib +s +h %BDRIVE%\grldr
-attrib +s +h %BDRIVE%\easyPcRecovery
-
-REM Copy files to the pendrive
-echo Copying files to %BDRIVE%...
-xcopy . %BDRIVE%\ /s /k /y /q > nul
-if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-
-cd /D %BDRIVE%\
-if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
-REM IF INSTALLING TO PENDRIVE MAKE SURE THE FLAG IS THERE ?
-REM echo Restoring backup flag 
-REM echo. > easyPcRecovery\clonezilla\images\images_are_stored_here.txt 
 
 REM Download and copy files 
 GOTO :FUN_DOWN_COPY
@@ -220,7 +213,7 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 if not exist gparted*.zip (
 echo Downloading the Gparted iso
-easyPcRecovery\bin\wget --no-check-certificate -c -q --show-progress http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.20.0-2/gparted-live-0.20.0-2-i486.zip
+easyPcRecovery\bin\wget --no-check-certificate -c -q --show-progress http://downloads.sourceforge.net/project/gparted/gparted-live-stable/0.25.0-3/gparted-live-0.25.0-3-i686.zip
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 )
 
@@ -261,6 +254,7 @@ SET /P input="Are you sure you want to install easyPcRecovery into %bdrive%? (Y/
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 REM Be sure to unhide before install to prevent error for copy hide files
+copy /Y UnHideEverything.cmd %BDRIVE%\ > nul
 @cmd /c UnHideEverything.cmd > nul
 if exist %BDRIVE%\UnHideEverything.cmd (
 @cmd /c %BDRIVE%\UnHideEverything.cmd > nul
@@ -285,8 +279,8 @@ if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 cd /D %BDRIVE%\
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 REM IF INSTALLING TO HD MAKE SURE THE FLAG IS THERE 
-echo Restoring backup flag 
-echo. > easyPcRecovery\clonezilla\images\images_are_stored_here.txt 
+echo Creating backup flag 
+echo You need this file here to make backups in this disk/partition > easyPcRecovery\easyPcRecovery.txt 
 
 REM Function for download and copy the files
 :FUN_DOWN_COPY
@@ -398,8 +392,8 @@ EXIT /B
 :FINISH_CD
 
 cd ..
-echo Deleting backup flag 
-del /Q easyPcRecovery\clonezilla\images\images_are_stored_here.txt > nul
+REM echo Deleting backup flag 
+REM del /Q easyPcRecovery.txt > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 call EasyPcRecovery\ISO\makegrub4dosiso.cmd ..\..\easyPcRecovery.iso %cd%  easyPcRecovery
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
@@ -419,6 +413,14 @@ EXIT /B
 
 :FINISH_PEN
 
+REM Copy files to the pendrive finally
+echo Copying files to %BDRIVE%...
+xcopy * %BDRIVE%\ /s /k /y /q > nul
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
+cd /D %BDRIVE%\
+if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
+
 echo Installing MBR into %bdrive%...
 if not exist %bdrive%\easyPcRecovery\mbrbackups mkdir %bdrive%\easyPcRecovery\mbrbackups
 
@@ -430,18 +432,13 @@ if  %ERRORLEVEL% NEQ 0 (
   echo.
   echo.
   echo Something was wrong with grubinst.exe
-  echo You have a backup: in:
+  echo You have a backup in:
   echo %bdrive%\easyPcRecovery\mbrbackups\mbr-pre-install-grub.bin    
   echo To restore the old mbr on %bdrive% You can run: 
   echo %BDRIVE%\easyPcRecovery\clonezilla\grubinst.exe --restore=%bdrive%\easyPcRecovery\mbrbackups\mbr-pre-intall-grub.bin  ^(%diskId%^) 
   pause 
   GOTO :EXIT
  )
-
-cd ..
-echo Deleting backup flag 
-del /Q easyPcRecovery\clonezilla\images\images_are_stored_here.txt > nul
-if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 
 echo.
 echo.
@@ -451,6 +448,9 @@ echo If you only have an unit you could boot to gparted and do the partitioning 
 echo you can even set the hidden flag for the new partition if you want it.
 echo Otherwise reboot from USB and make your fresh first backup right now if you want it.
 echo Press F4 or down arrow on the new boot menu to see the avaliable options.
+echo ¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡IMPORTANT TO REMEMBER!!!!!!!!!!!!!!!!!!!!!!!
+echo You need to create the file /easyPcRecovery/easyPcRecovery.txt 
+echo in your destiny backup disk to be able to make backups with the pendrive
 echo ===============FINISHED===============
 
 pause 

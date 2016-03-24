@@ -11,7 +11,7 @@ title ^F3 F3 Boot Windows XP
 find --set-root --devices=h /ntldr
 chainloader /ntldr
 
-title ^F4 F4 Windows XP recovery console
+iftitle [find --devices=h /cmldr ]  ^F4 F4 Windows XP recovery console
 find --set-root /cmldr
 chainloader /cmldr
 ########################################################
@@ -22,7 +22,7 @@ write 0x7C03 0x63646D63
 # step 2. Write 3 chars "ons" and an ending null at 0000:7C07
 write 0x7C07 0x00736E6F 
 
-title ^F5 F5 Boot Windows Vista or Windows 7
+iftitle [find --devices=h /bootmgr ] ^F5 F5 Boot Windows Vista or Windows 7
 find --set-root --devices=h /bootmgr
 chainloader /bootmgr
 
@@ -30,11 +30,11 @@ title ^F6 F6 Boot from CD
 chainloader (cd)
 rootnoverify (cd) 
 
-title ^F7 F7 Boot from USB (even if you BIOS doesn´t allow it)
+iftitle [find --devices=h /easyPcRecovery/extras/plop/plpbt.bin ] ^F7 F7 Boot from USB (even if you BIOS doesn´t allow it)
 find --set-root --ignore-floppies   /easyPcRecovery/extras/plop/plpbt.bin
 kernel /easyPcRecovery/extras/plop/plpbt.bin hiddenusb usb1=2
 
-title ^F8 F8 Boot SliTaz (5.0-rc3)
+iftitle [find --devices=h /easyPcRecovery/extras/slitaz/slitaz.iso  ] ^F8 F8 Boot SliTaz (5.0-rc3)
 find --set-root --ignore-floppies   /easyPcRecovery/extras/slitaz/slitaz.iso 
 map /easyPcRecovery/extras/slitaz/slitaz.iso (0xff) || map --mem /easyPcRecovery/extras/slitaz/slitaz.iso  (0xff)
 map --hook root (0xff)

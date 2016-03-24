@@ -7,14 +7,15 @@ IF %ERRORLEVEL% NEQ 0 (
 	GOTO :EOF
 )
 @ECHO ON
+
 REM Reset errorlevel
 VER > NUL 
+
 attrib +s +h \easyPcRecovery
 attrib +s +h \INSTALL.cmd
 attrib +s +h \UNINSTALL.cmd
-attrib +s +h \prueba*.cmd
 attrib +s +h \HideEverything.cmd
-attrib +s +h %systemdrive%\*.lst
-attrib +s +h %systemdrive%\grldr
-attrib +s +h %systemdrive%\easyPcRecovery
+if exist %systemdrive%\menu.lst  attrib +s +h %systemdrive%\menu.lst
+if exist %systemdrive%\grldr attrib +s +h %systemdrive%\grldr
+if exist %systemdrive%\easyPcRecovery attrib +s +h %systemdrive%\easyPcRecovery
 attrib +s +h \README.md
