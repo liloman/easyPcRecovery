@@ -22,11 +22,14 @@ command /easyPcRecovery/menus/getDisks.g4b
 
 #dont Use %LOCALES% by default...
 #set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
-set BOPT=boot=live quiet live-config noswap edd=on nomodeset ip=frommedia union=overlay nosplash 
+#General
+set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=788 username=user
 #For clonezillas
-set RUN=ocs_live_run="ocs-live-general" live-media-path=/easyPcRecovery/clonezilla/live bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs
+set RUNC=ocs_live_run="ocs-live-general" live-media-path=/easyPcRecovery/clonezilla/live  toram=filesystem.squashfs
 #For recovery/backup only
 set PRERUN=ocs_prerun="mount /dev/%BAKDRV% /mnt" ocs_prerun1="mount --bind /mnt/easyPcRecovery/clonezilla/images /home/partimag/"
+#For gparted
+set RUNG=live-media-path=/easyPcRecovery/gparted/live  toram=filesystem.squashfs 
 
 timeout 25
 default 0
@@ -42,24 +45,23 @@ echo You need a partition/disk prepared for backups with the /easyPcRecovery/eas
 iftitle [ find --devices=h /easyPcRecovery/easyPcRecovery.txt  ] ^F5 F5 Recover Windows XP Backup from %DTITLE% to %OTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
-kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
+kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUNC% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
 iftitle [ find --devices=h /easyPcRecovery/easyPcRecovery.txt  ] ^F6 F6 Backup Windows XP from %OTITLE% to %DTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -q2 -sc -rm-win-swap-hib -c --batch -j2 -z1 -i 2000 -p reboot saveparts ask_user %WDRV%"
-kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUN% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
+kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUNC% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
 iftitle [ find --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz  ] ^F7 F7 Boot clonezilla (manual) from %DTITLE%
-kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUN% ocs_live_batch="no"
+kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUNC% ocs_live_batch="no"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-iftitle [ find --devices=hc /easyPcRecovery/gparted/vmlinuz ] ^F8 F8 GParted live (partitioning) from %DTITLE%
-set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
-set RUN=live-media-path=/easyPcRecovery/gparted bootfrom=/dev/%BAKDRV% toram=filesystem.squashfs 
-kernel /easyPcRecovery/gparted/vmlinuz %BOPT% %RUN% %LOCALES% gl_batch union=aufs
-initrd /easyPcRecovery/gparted/initrd.img
+iftitle [ find --devices=hc /easyPcRecovery/gparted/live/vmlinuz ] ^F8 F8 GParted live (partitioning) from %DTITLE%
+set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=788 username=user
+kernel /easyPcRecovery/gparted/live/vmlinuz %BOPT% %RUNG% 
+initrd /easyPcRecovery/gparted/live/initrd.img
 
 iftitle [ find --devices=hc /easyPcRecovery/menus/extras.lst ] ^F9 F9 Extra Options (recovery console,Windows Vista/7,USB boot,Slitaz)
-configfile /easyPcRecovery/menus/extras.lst
+    configfile /easyPcRecovery/menus/extras.lst
