@@ -4,7 +4,7 @@ clear
 # allow text output from any future commands  so we can debug the menu items
 debug on
 
-timeout 25
+timeout 500
 default 0
 
 title [F3] Boot Windows XP

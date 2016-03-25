@@ -41,7 +41,7 @@ rmdir /s /q easyPcRecovery\gparted
 rmdir /s /q easyPcRecovery\extras
 rmdir /s /q easyPcRecovery\bin
 rmdir /s /q easyPcRecovery\clonezilla\live
-REM Be careful don´t add /s flag here!!
+REM Be careful don´t add /s flag here... recursive!!
 del /q easyPcRecovery\clonezilla\*
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 )

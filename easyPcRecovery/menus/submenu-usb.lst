@@ -8,12 +8,18 @@ debug on
 # Default search order: ud, pxe, network equipment, hard disk, CD-ROM, floppy disk
 # --devices=upnhcf
 
+#Map first disk to the real hd0 cause booting from USB(BIOS)  swapped these values
+# so we swapped then again :D
+map (hd1) (hd0)
+map (hd0) (hd1)
+map --hook 
+
 #find windows drive
 find --devices=h /windows/explorer.exe  | set OTITLE= 
 
-# find by disks first and then cd-rom for DTITLE ... (patched by me!)
+# search in disks only for DTITLE ...
 # https://github.com/chenall/grub4dos/issues/93
-find --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz | set DTITLE= 
+find --devices=h /easyPcRecovery/easyPcRecovery.txt | set DTITLE= 
 
 # find source volume for Windows and our backup volume  and set root for real :S
 find --set-root --devices=hc /easyPcRecovery/menus/getDisks.g4b 
@@ -54,7 +60,7 @@ set RUN1=ocs_live_run="ocs-sr -q2 -sc -rm-win-swap-hib -c --batch -j2 -z1 -i 200
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUNC% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
-iftitle [ find --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz  ] [F7] Boot clonezilla (manual)
+iftitle [ find --devices=hc /easyPcRecovery/clonezilla/live/vmlinuz  ] [F7] Boot clonezilla (manual) 
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUNC% ocs_live_batch="no"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 

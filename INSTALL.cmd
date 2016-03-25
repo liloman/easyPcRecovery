@@ -156,8 +156,8 @@ attrib -s -h %BDRIVE%\menu.lst > nul
 attrib -s -h %BDRIVE%\grldr > nul
 attrib -s -h %BDRIVE%\easyPcRecovery > nul
 
-echo Copying menu.lst and grldr to %BDRIVE%\
-copy /Y easyPcRecovery\menus\menu.lst %BDRIVE%\  > nul
+echo Copying menu.lst ^(usb^) and grldr to %BDRIVE%\
+copy /Y easyPcRecovery\menus\menu-usb.lst %BDRIVE%\menu.lst  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
 copy /Y easyPcRecovery\menus\grldr %BDRIVE%\  > nul
 if %ERRORLEVEL% NEQ 0 (  GOTO :ERROR )
