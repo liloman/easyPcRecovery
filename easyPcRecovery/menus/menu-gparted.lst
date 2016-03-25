@@ -3,7 +3,7 @@ default 0
 
 title GParted live (partitioning)
 find --set-root --devices=hc  /easyPcRecovery/gparted/live/vmlinuz
-set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=788 username=user
+set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=normal username=user
 set RUNG=live-media-path=/easyPcRecovery/gparted/live  toram=filesystem.squashfs 
 kernel /easyPcRecovery/gparted/live/vmlinuz %BOPT% %RUNG% 
 initrd /easyPcRecovery/gparted/live/initrd.img

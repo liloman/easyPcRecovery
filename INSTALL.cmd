@@ -145,10 +145,10 @@ SET /P input="Are you sure you want to install easyPcRecovery into %BDRIVE%? (Y/
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 REM Be sure to unhide before install to prevent error for copy hide files
-copy /Y UnHideEverything.cmd %BDRIVE%\  > nul
-@cmd /c UnHideEverything.cmd > nul
-if exist %BDRIVE%\UnHideEverything.cmd (
-@cmd /c %BDRIVE%\UnHideEverything.cmd > nul
+copy /Y UnHideEasyPcRecovery.cmd %BDRIVE%\  > nul
+@cmd /c UnHideEasyPcRecovery.cmd > nul
+if exist %BDRIVE%\UnHideEasyPcRecovery.cmd (
+@cmd /c %BDRIVE%\UnHideEasyPcRecovery.cmd > nul
 )
 
 REM Additional files for PENDRIVE
@@ -257,10 +257,10 @@ SET /P input="Are you sure you want to install easyPcRecovery into %bdrive%? (Y/
 if /I not "%input%"=="Y" ( GOTO :EXIT )
 
 REM Be sure to unhide before install to prevent error for copy hide files
-copy /Y UnHideEverything.cmd %BDRIVE%\ > nul
-@cmd /c UnHideEverything.cmd > nul
-if exist %BDRIVE%\UnHideEverything.cmd (
-@cmd /c %BDRIVE%\UnHideEverything.cmd > nul
+copy /Y UnHideEasyPcRecovery.cmd %BDRIVE%\ > nul
+@cmd /c UnHideEasyPcRecovery.cmd > nul
+if exist %BDRIVE%\UnHideEasyPcRecovery.cmd (
+@cmd /c %BDRIVE%\UnHideEasyPcRecovery.cmd > nul
 )
 
 echo Copying menu.lst and grldr to %systemdrive%\
@@ -378,7 +378,7 @@ if  %ERRORLEVEL% NEQ 0 (
 
 echo Hiding files...
 cd ..
-@cmd /c HideEverything.cmd > nul
+@cmd /c HideEasyPcRecovery.cmd > nul
 
 echo.
 echo.

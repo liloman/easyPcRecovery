@@ -23,7 +23,7 @@ command /easyPcRecovery/menus/getDisks.g4b
 #dont Use %LOCALES% by default...
 #set LOCALES=locales="es_ES.UTF-8" keyboard-layouts="es"
 #General
-set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=788 username=user
+set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=normal username=user
 #For clonezillas
 set RUNC=ocs_live_run="ocs-live-general" live-media-path=/easyPcRecovery/clonezilla/live  toram=filesystem.squashfs
 #For recovery/backup only
@@ -59,7 +59,7 @@ kernel /easyPcRecovery/clonezilla/live/vmlinuz %LOCALES% %BOPT% %RUNC% ocs_live_
 initrd /easyPcRecovery/clonezilla/live/initrd.img
 
 iftitle [ find --devices=hc /easyPcRecovery/gparted/live/vmlinuz ] [F8] GParted live (partitioning) from %DTITLE%
-set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=788 username=user
+set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=normal username=user
 kernel /easyPcRecovery/gparted/live/vmlinuz %BOPT% %RUNG% 
 initrd /easyPcRecovery/gparted/live/initrd.img
 
