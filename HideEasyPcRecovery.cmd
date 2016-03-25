@@ -14,8 +14,8 @@ VER > NUL
 attrib +s +h \easyPcRecovery
 attrib +s +h \INSTALL.cmd
 attrib +s +h \UNINSTALL.cmd
-attrib +s +h \HideEverything.cmd
+attrib +s +h \README.md
+attrib +s +h \HideEasyPcRecovery.cmd
 if exist %systemdrive%\menu.lst  attrib +s +h %systemdrive%\menu.lst
 if exist %systemdrive%\grldr attrib +s +h %systemdrive%\grldr
 if exist %systemdrive%\easyPcRecovery attrib +s +h %systemdrive%\easyPcRecovery
-attrib +s +h \README.md

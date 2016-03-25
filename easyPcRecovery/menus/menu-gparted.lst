@@ -8,7 +8,7 @@ set RUNG=live-media-path=/easyPcRecovery/gparted/live  toram=filesystem.squashfs
 kernel /easyPcRecovery/gparted/live/vmlinuz %BOPT% %RUNG% 
 initrd /easyPcRecovery/gparted/live/initrd.img
 
-title ^F4 F4 Boot Windows (XP)
+title Boot Windows (XP)
 find --set-root --devices=h /ntldr
 chainloader /ntldr
 

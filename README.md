@@ -17,4 +17,4 @@ For documentation go to the [Wiki](https://github.com/liloman/easyPcRecovery/wik
 - [ ] Create minimal live with custom boot.fedoraproject.com
 
 ###Fixes
-- [ ] Fix hotkeys
+- [x] Fix hotkeys

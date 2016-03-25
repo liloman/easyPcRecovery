@@ -1,5 +1,7 @@
 #load key mappings
 find --set-root --devices=hc /easyPcRecovery/clonezilla/hotkey 
+#execute hotkey
+/easyPcRecovery/clonezilla/hotkey 
 
 timeout 1
 default 0
@@ -8,6 +10,6 @@ title Boot Windows (XP)
 find --set-root --devices=h /ntldr
 chainloader /ntldr
 
-title ^F4 F4 Recover PC (SATA)
+title [F4] Recover PC (SATA)
 configfile /easyPcRecovery/menus/submenu.lst
 
