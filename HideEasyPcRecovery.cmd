@@ -12,8 +12,8 @@ REM Reset errorlevel
 VER > NUL 
 
 attrib +s +h \easyPcRecovery
-attrib +s +h \INSTALL.cmd
-attrib +s +h \UNINSTALL.cmd
+attrib +s +h \InstallEasyPcRecovery.cmd
+attrib +s +h \UninstallEasyPcRecovery.cmd
 attrib +s +h \README.md
 attrib +s +h \HideEasyPcRecovery.cmd
 if exist %systemdrive%\menu.lst  attrib +s +h %systemdrive%\menu.lst

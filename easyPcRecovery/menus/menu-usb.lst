@@ -10,6 +10,6 @@ title Boot Windows (XP)
 find --set-root --devices=h /ntldr
 chainloader /ntldr
 
-title [F4] Recover PC (SATA)
+title [F4] easyPcRecovery menu (SATA)
 configfile /easyPcRecovery/menus/submenu-usb.lst
 
