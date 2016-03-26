@@ -27,7 +27,8 @@ set BOPT=boot=live config noswap noprompt ip=frommedia union=overlay debug vga=n
 #For clonezillas
 set RUNC=ocs_live_run="ocs-live-general" live-media-path=/easyPcRecovery/clonezilla/live  toram=filesystem.squashfs
 #For recovery/backup only
-set PRERUN=ocs_prerun="mount /dev/%BAKDRV% /mnt" ocs_prerun1="mount --bind /mnt/easyPcRecovery/clonezilla/images /home/partimag/"
+# Mount the pendrive an execute prerun.sh script to mount and create the dirs on /home/partimage
+set PRERUN=ocs_prerun="mount /dev/sdb1 -o ro /media"  ocs_prerun1="cp /media/easyPcRecovery/clonezilla/prerun.sh /tmp/" ocs_prerun2="umount /media" ocs_prerun3="/tmp/prerun.sh %BAKDRV%"
 #For gparted
 set RUNG=live-media-path=/easyPcRecovery/gparted/live  toram=filesystem.squashfs 
 
@@ -38,15 +39,19 @@ iftitle [find --devices=h /ntldr]  [F3] Boot Windows XP from %OTITLE%
 find --set-root --devices=h /ntldr 
 chainloader /ntldr
 
-# If false
-iftitle [ checkrange 0 find --devices=h /easyPcRecovery/easyPcRecovery.txt ] You need a partition/disk prepared for backups
-echo You need a partition/disk prepared for backups with the /easyPcRecovery/easyPcRecovery.txt file
+# If false (not working)
+#iftitle [ checkrange 0 find --devices=h /easyPcRecovery/clonezilla/images/images_are_stored_here.txt ] You need to make some backup
+#echo You need a partition/disk prepared for backups with the /easyPcRecovery/easyPcRecovery.txt file
 
-iftitle [ find --devices=h /easyPcRecovery/easyPcRecovery.txt  ] [F5] Recover Windows XP Backup from %DTITLE% to %OTITLE%
+iftitle [ find --devices=h /easyPcRecovery/clonezilla/images/images_are_stored_here.txt  ] [F5] Recover Windows XP Backup from %DTITLE% to %OTITLE%
 #dont fit locales
 set RUN1=ocs_live_run="ocs-sr -c --batch -e1 auto -e2 -j2 -k -p reboot restoreparts ask_user %WDRV%"
 kernel /easyPcRecovery/clonezilla/live/vmlinuz %BOPT% %RUNC% %PRERUN% %RUN1% %LOCALES% ocs_live_batch="yes"
 initrd /easyPcRecovery/clonezilla/live/initrd.img
+
+# If false (not working)
+#iftitle [ checkrange 0 find --devices=h /easyPcRecovery/easyPcRecovery.txt ] You need a partition/disk prepared for backups
+#echo You need a partition/disk prepared for backups with the /easyPcRecovery/easyPcRecovery.txt file
 
 iftitle [ find --devices=h /easyPcRecovery/easyPcRecovery.txt  ] [F6] Backup Windows XP from %OTITLE% to %DTITLE%
 #dont fit locales

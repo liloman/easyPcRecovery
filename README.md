@@ -10,7 +10,7 @@ For documentation go to the [Wiki](https://github.com/liloman/easyPcRecovery/wik
 
 - [x] Create uninstall
 - [x] Create CD live creation
-- [ ] Make work iftitle with false return 
+- [ ] Make work iftitle with false return (WIP)
 - [X] Add support for USB live creation 
 - [ ] Update from InstallEasyPcRecovery.cmd ...
 - [ ] Make youtube videos/tutorial and make a tutorial with images! :fire:
